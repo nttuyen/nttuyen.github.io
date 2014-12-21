@@ -260,7 +260,7 @@ var Chart = function() {
 				position: 'top', 
 				textStyle: {
 					//color: 'blue', 
-					fontSize: 16
+					fontSize: 14
 				}
 			},
 			series: {},

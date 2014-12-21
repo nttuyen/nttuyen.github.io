@@ -37,6 +37,51 @@
 </div>
 <div class="container">
 <div class="row">
+	<div class="col-md-12">
+		<h4>Thông tin biểu đồ</h4>
+		<form class="form-inline" role="form">
+			<div class="form-group">
+				<div class="input-group">
+				  <label class="sr-only" for="chart_title">Tên</label>
+				  <div class="input-group-addon">Tên</div>
+				  <input type="text" class=" form-control" id="chart_title" placeholder="Tên biểu đồ" value="Tên biểu đồ">
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="input-group">
+				  <label class="sr-only" for="chart_width">Rộng</label>
+				  <div class="input-group-addon">Rộng</div>
+				  <input type="text" class="form-control" id="chart_width" placeholder="Độ rộng biểu đồ" value="900">
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="input-group">
+				  <label class="sr-only" for="chart_height">Cao</label>
+				  <div class="input-group-addon">Cao</div>
+				  <input type="text" class="form-control" id="chart_height" placeholder="Chiều cao biểu đồ" value="500">
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="input-group">
+				  <label class="sr-only" for="chart_group_width">Cột</label>
+				  <div class="input-group-addon">Cột</div>
+				  <input type="text" class="form-control" id="chart_group_width" placeholder="Độ rộng của 1 cột biểu đồ" value="">
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="checkbox">
+					<label>
+					  <input id="chart_is_stacked" type="checkbox"> is Stacked
+					</label>
+					<label>
+					  <input id="chart_is_vertical" type="checkbox"> is Vertical
+					</label>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="row">
 	<div class="col-md-4">
 		<h4>Danh sách các cột</h4>
 		<div id="chart_columns"></div>
@@ -45,47 +90,6 @@
 		</div>
 	</div>
 	<div class="col-md-2"></div>
-	<div class="col-md-4">
-		<h4>Thông tin tiểu đồ</h4>
-		<form class="form-horizontal" role="form">
-		  <div class="form-group">
-			<label for="chart_title" class="col-sm-4 control-label">Tên biểu đồ</label>
-			<div class="col-sm-8">
-			  <input id="chart_title" type="text" class="form-control" placeholder="Tên biểu đồ" value="Tên biểu đồ">
-			</div>
-		  </div>
-		  <div class="form-group">
-			<label for="chart_width" class="col-sm-4 control-label">Chiều rộng</label>
-			<div class="col-sm-8">
-			  <input id="chart_width" type="text" class="form-control" placeholder="Chiều rộng" value="900">
-			</div>
-		  </div>
-		  <div class="form-group">
-			<label for="chart_height" class="col-sm-4 control-label">Chiều cao</label>
-			<div class="col-sm-8">
-			  <input id="chart_height" type="text" class="form-control" placeholder="Chiều cao" value="500">
-			</div>
-		  </div>
-		  <div class="form-group">
-			<label for="chart_group_width" class="col-sm-4 control-label">Độ rộng của cột biểu đồ</label>
-			<div class="col-sm-8">
-			  <input id="chart_group_width" type="text" class="form-control" placeholder="Độ rộng cột biểu đồ" value="0">
-			</div>
-		  </div>
-		  <div class="form-group">
-			<label for="chart_is_stacked" class="col-sm-4 control-label">is Stacked</label>
-			<div class="col-sm-8">
-			  <input id="chart_is_stacked" type="checkbox">
-			</div>
-		  </div>
-		  <div class="form-group">
-			<label for="chart_is_vertical" class="col-sm-4 control-label">is vertical</label>
-			<div class="col-sm-8">
-			  <input id="chart_is_vertical" type="checkbox">
-			</div>
-		  </div>
-		</form>
-	</div>
 </div>
 <div class="row">
 	<div class="col-md-10">
