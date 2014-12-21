@@ -399,19 +399,50 @@ google.setOnLoadCallback(function() {
 		$('#btn_draw_chart').on('click', function() {
 			chart.draw();
 			return false;
-			alert('done');
 		});
 		
+		$('#list_template_menu').on('click', 'a', function() {
+			var $this = $(this);
+			window.location.href += $this.attr('href');
+			window.location.reload();
+		});
+		
+		var listFile = [];
+		var $ul = $('#list_template_menu');
+		$.get('https://api.github.com/gists/b346dd60a98a3c686c80', function(response){
+			var files = response.files;
+			for(var filename in files) {
+				var file = files[filename];
+				//. Add more link
+				var ele = '<li><a href="';
+				ele += "#gists=" + file.raw_url;
+				ele += '">';
+				ele += filename;
+				ele += "</a></li>"
+				$ul.append(ele);
+			}
+		})
+		
 		var hash = window.location.hash;
-		if(hash && hash != null) {
+		if(hash && hash != '') {
 			hash = hash.substring(1, hash.length);
-			var jsFile = 'data/' + hash + ".js";
-			//. load js dynamic
-			var fileref=document.createElement('script')
-			fileref.setAttribute("type","text/javascript")
-			fileref.setAttribute("src", jsFile);
-			console.log(fileref);
-			document.getElementsByTagName("head")[0].appendChild(fileref);
+			if(hash.indexOf('gists=') != -1) {
+				//TODO:
+				var gitURL = hash.substring(6, hash.length);
+				//. Use ajax to load data
+				$.get(gitURL, function(response){
+					var obj;
+					eval('obj = {' + response + '}');
+					window.chart.loadData(obj);
+				});
+			} else {
+				var jsFile = 'data/' + hash + ".js";
+				//. load js dynamic
+				var fileref=document.createElement('script')
+				fileref.setAttribute("type","text/javascript")
+				fileref.setAttribute("src", jsFile);
+				document.getElementsByTagName("head")[0].appendChild(fileref);
+			}
 		}
 	});
 });
