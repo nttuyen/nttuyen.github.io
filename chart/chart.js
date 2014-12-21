@@ -326,6 +326,55 @@ var Chart = function() {
 		this.isDrawed = true;
 	}
 
+	this.reset = function() {
+		//TODO: how to reset chart
+	}
+	
+	this.loadData = function(data) {
+		var $this = this;
+		$this.reset();
+		if(data.config) {
+			jQuery('#chart_title').val(data.config.title);
+			jQuery('#chart_width').val(data.config.width);
+			jQuery('#chart_height').val(data.config.height);
+			jQuery('#chart_group_width').val(data.config.groupWidth);
+			jQuery('#chart_is_stacked').attr('checked', data.config.isStacked);
+			jQuery('#chart_is_vertical').attr('checked', data.config.isVertical);
+		}
+		
+		//. Process column
+		if(data.columns && data.columns.length > 0) {
+			for(var i = 0; i < data.columns.length; i++) {
+				var title = data.columns[i];
+				var col = {
+					title: title,
+					type: 'bar',
+					isShowLabel: true,
+					color: '',
+					axis: 0,
+				};
+				col = jQuery.extend(col, data.columnConfigs[i]);
+				
+				$this.setColumn(i, col);
+			}
+		}
+		
+		// Process row
+		if(data.data && data.data.length > 0) {
+			for(var i = 0; i < data.data.length; i++) {
+				var r = data.data[i];
+				var row = [];
+				row.push(r[0]);
+				for(var j = 1; j < r.length; j++) {
+					row.push(r[j]);
+					row.push(r[j]);
+				}
+				$this.setRow(i, row);
+			}			
+			$this.draw();
+		}
+	}
+	
 	//TODO: init data here
 	this.init();
 	this.drawTable();
@@ -339,9 +388,9 @@ google.setOnLoadCallback(function() {
 	googleChart = new google.visualization.ComboChart(document.getElementById('chart_div'));
 	jQuery(document).ready(function($) {
 		window.chart = new Chart();
-		
+		var index = 1;
 		$('#btn_add_column').on('click', function() {
-			chart.addColumn({title: 'Them cot moi'});
+			chart.addColumn({title: 'Cột ' + index++});
 		});
 		$('#btn_add_row').on('click', function() {
 			chart.addRow();
