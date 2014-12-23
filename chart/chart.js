@@ -1,8 +1,7 @@
 NUMBER_FORMAT = '0,0.00';
-google.load("visualization", "1", {packages:["corechart"]});
-googleChart = false;
+google.load("visualization", "1", {packages:["corechart"], language: 'vi'});
 
-var Chart = function() {
+var Chart = function(googleChart) {
 	//Private method
 	function getNumberColumnType() {
 		return {
@@ -38,6 +37,7 @@ var Chart = function() {
 		};
 	}
 	
+	this.googleChart = googleChart;
 	this.isDrawed = false;
 	
 	//Properties
@@ -97,6 +97,8 @@ var Chart = function() {
 				colHeaders: $this.columnHeaders,
 				data: $this.columns,
 				observeChanges: true,
+				manualColumnResize: true,
+				manualRowResize: true,
 				columns: $this.columnHeaderDefs,
 				afterChange: function(changes, source) {
 					if(!changes) {
@@ -150,8 +152,10 @@ var Chart = function() {
 			$this.dataTable = new Handsontable(container, {
 				colHeaders: $this.dataHeaders,
 				data: $this.data,
-				columnSorting: true,
+				//columnSorting: true,
 				observeChanges: true,
+				manualColumnResize: true,
+				manualRowResize: true,
 				columns: $this.dataColmnDef,
 				afterChange: function(changes, source) {
 					if($this.isDrawed) {
@@ -231,7 +235,7 @@ var Chart = function() {
 	
 	this.draw = function() {
 		var $this = this;
-		if(!googleChart) {
+		if(!$this.googleChart) {
 			alert('can not draw because google chart is not loaded');
 			return false;
 		}
@@ -247,8 +251,8 @@ var Chart = function() {
 		var options = {
 			title: $title,
 			titleTextStyle: {
-				fontName: 'Time new roman',
-				fontSize: 28
+				fontSize: 20,
+				fontName: 'Time news roman'
 			},
 			seriesType: "bars",
 			isStacked: $isStacked,
@@ -322,7 +326,7 @@ var Chart = function() {
 		}
 		
 		var gd = google.visualization.arrayToDataTable(d);
-		googleChart.draw(gd, options);
+		$this.googleChart.draw(gd, options);
 		this.isDrawed = true;
 	}
 
@@ -359,18 +363,29 @@ var Chart = function() {
 			}
 		}
 		
+		var columnLength = this.columns.length;
+		var hasLabelValue = false;
 		// Process row
 		if(data.data && data.data.length > 0) {
+			hasLabelValue = (data.data[0].length == (2 * columnLength + 1));
 			for(var i = 0; i < data.data.length; i++) {
 				var r = data.data[i];
 				var row = [];
 				row.push(r[0]);
 				for(var j = 1; j < r.length; j++) {
 					row.push(r[j]);
-					row.push(r[j]);
+					if(hasLabelValue) {
+						row.push(r[++j]);
+					} else {
+						var v = r[j];
+						if(typeof v == 'number' || v instanceof Number) {
+							v = v.toLocaleString('vi-VN');
+						}
+						row.push(v);
+					}
 				}
 				$this.setRow(i, row);
-			}			
+			}
 			$this.draw();
 		}
 	}
@@ -385,9 +400,9 @@ var Chart = function() {
 //jQuery
 jQuery.noConflict();
 google.setOnLoadCallback(function() {
-	googleChart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+	var googleChart = new google.visualization.ComboChart(document.getElementById('chart_div'));
 	jQuery(document).ready(function($) {
-		window.chart = new Chart();
+		window.chart = new Chart(googleChart);
 		var index = 1;
 		$('#btn_add_column').on('click', function() {
 			chart.addColumn({title: 'Cột ' + index++});
@@ -409,19 +424,40 @@ google.setOnLoadCallback(function() {
 		
 		var listFile = [];
 		var $ul = $('#list_template_menu');
-		$.get('https://api.github.com/gists/b346dd60a98a3c686c80', function(response){
-			var files = response.files;
-			for(var filename in files) {
-				var file = files[filename];
-				//. Add more link
-				var ele = '<li><a href="';
-				ele += "#gists=" + file.raw_url;
-				ele += '">';
-				ele += filename;
-				ele += "</a></li>"
-				$ul.append(ele);
+		var metaDataURL = 'https://gist.githubusercontent.com/nttuyen/629928132e4efffa20ec/raw/b918395a77bbd9b2335699662725fe08f5a349af/charts';
+		$.get(metaDataURL, function(response){
+			var meta;
+			eval('meta = ' + response);
+			if(meta.gists && meta.gists.length > 0) {
+				for(var i = 0; i < meta.gists.length; i++) {
+					var url = meta.gists[i];
+					$.get(url, function(response){
+						var files = response.files;
+						for(var filename in files) {
+							var file = files[filename];
+							//. Add more link
+							var ele = '<li><a href="';
+							ele += "#url=" + file.raw_url;
+							ele += '">';
+							ele += filename;
+							ele += "</a></li>"
+							$ul.append(ele);
+						}
+					})
+				}
 			}
-		})
+			if(meta.charts && meta.charts.length > 0) {
+				for(var i = 0; i < meta.charts.length; i++) {
+					var chart = meta.charts[i];
+					var ele = '<li><a href="';
+					ele += "#url=" + chart.url;
+					ele += '">';
+					ele += chart.title;
+					ele += "</a></li>"
+					$ul.append(ele);
+				}
+			}
+		});
 		
 		var hash = window.location.hash;
 		if(hash && hash != '') {
@@ -432,7 +468,27 @@ google.setOnLoadCallback(function() {
 				//. Use ajax to load data
 				$.get(gitURL, function(response){
 					var obj;
-					eval('obj = {' + response + '}');
+					var e = response;
+					if(response[0] != '{') {
+						e = '{' + e + '}';
+					}
+					eval('obj = ' + e);
+					window.chart.loadData(obj);
+				});
+			} else if(hash.indexOf('url=') != -1) {
+				var url = hash.substring(4, hash.length);
+				$.get(url, function(response) {
+					var obj;
+					if(typeof response == 'string' || response instanceof String) {
+						var e = response;
+						if(response[0] != '{') {
+							e = '{' + e + '}';
+						}
+						eval('obj = ' + e);
+					} else {
+						obj = response;
+					}
+					//. 
 					window.chart.loadData(obj);
 				});
 			} else {
