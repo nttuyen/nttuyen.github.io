@@ -353,8 +353,10 @@ var Chart = function(googleChart) {
 		console.log($position, width, height);
 		
 		var $mask = jQuery('#chart_mask');
-		var top = $position.top + (height / 3 * 2);
-		var left = $position.left + (width / 3);
+		var mHeight = $mask.height();
+		var mWidth = $mask.width();
+		var top = $position.top + mHeight;
+		var left = $position.left + width - mWidth;
 		$mask.css('top', top);
 		$mask.css('left', left);
 		console.log(top, left);
