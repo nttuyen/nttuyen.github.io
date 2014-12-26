@@ -317,7 +317,6 @@ var Chart = function(googleChart) {
 				}
 			}
 		}
-		console.log(h);
 		d.push(h);
 		for(var i = 0; i < $this.data.length; i++) {
 			var s = JSON.parse(JSON.stringify($this.data[i]));
@@ -350,7 +349,6 @@ var Chart = function(googleChart) {
 		var $position = $div.position();
 		var width = $div.width();
 		var height = $div.height();
-		console.log($position, width, height);
 		
 		var $mask = jQuery('#chart_mask');
 		var mHeight = $mask.height();
@@ -359,7 +357,6 @@ var Chart = function(googleChart) {
 		var left = $position.left + width - mWidth;
 		$mask.css('top', top);
 		$mask.css('left', left);
-		console.log(top, left);
 	}
 
 	this.reset = function() {
@@ -457,8 +454,6 @@ google.setOnLoadCallback(function() {
 		$('#chart_type').on('change', function(){
 			var $this = $(this);
 			var chartType = $this.val();
-			console.log($this);
-			console.log(chartType);
 			
 			var googleChart = false;
 			var container = document.getElementById('chart_div');
@@ -475,37 +470,46 @@ google.setOnLoadCallback(function() {
 		
 		var listFile = [];
 		var $ul = $('#list_template_menu');
-		var metaDataURL = 'https://gist.githubusercontent.com/nttuyen/629928132e4efffa20ec/raw/b918395a77bbd9b2335699662725fe08f5a349af/charts';
-		$.get(metaDataURL, function(response){
-			var meta;
-			eval('meta = ' + response);
-			if(meta.gists && meta.gists.length > 0) {
-				for(var i = 0; i < meta.gists.length; i++) {
-					var url = meta.gists[i];
-					$.get(url, function(response){
-						var files = response.files;
-						for(var filename in files) {
-							var file = files[filename];
-							//. Add more link
-							var ele = '<li><a href="';
-							ele += "#url=" + file.raw_url;
-							ele += '">';
-							ele += filename;
-							ele += "</a></li>"
-							$ul.append(ele);
+		var gistURL = 'https://api.github.com/users/nttuyen/gists';
+		$.get(gistURL, function(response) {
+			for(var i = 0; i < response.length; i++) {
+				var res = response[i];
+				if(res.files.nttuyen_simple_github_io_charts) {
+					var m = res.files.nttuyen_simple_github_io_charts;
+					var metaDataURL = m.raw_url;
+					$.get(metaDataURL, function(response){
+						var meta;
+						eval('meta = ' + response);
+						if(meta.gists && meta.gists.length > 0) {
+							for(var i = 0; i < meta.gists.length; i++) {
+								var url = meta.gists[i];
+								$.get(url, function(response){
+									var files = response.files;
+									for(var filename in files) {
+										var file = files[filename];
+										//. Add more link
+										var ele = '<li><a href="';
+										ele += "#url=" + file.raw_url;
+										ele += '">';
+										ele += filename;
+										ele += "</a></li>"
+										$ul.append(ele);
+									}
+								})
+							}
 						}
-					})
-				}
-			}
-			if(meta.charts && meta.charts.length > 0) {
-				for(var i = 0; i < meta.charts.length; i++) {
-					var chart = meta.charts[i];
-					var ele = '<li><a href="';
-					ele += "#url=" + chart.url;
-					ele += '">';
-					ele += chart.title;
-					ele += "</a></li>"
-					$ul.append(ele);
+						if(meta.charts && meta.charts.length > 0) {
+							for(var i = 0; i < meta.charts.length; i++) {
+								var chart = meta.charts[i];
+								var ele = '<li><a href="';
+								ele += "#url=" + chart.url;
+								ele += '">';
+								ele += chart.title;
+								ele += "</a></li>"
+								$ul.append(ele);
+							}
+						}
+					});
 				}
 			}
 		});
