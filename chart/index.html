@@ -22,6 +22,7 @@
 	<script src="libs/handsontable.full.js"></script>
 	
 	<script type="text/javascript" src="chart.js"></script>
+	<link rel="stylesheet" media="screen" href="chart.css">
 </head>
 <body>
 <div class="container">
@@ -40,6 +41,16 @@
 	<div class="col-md-12">
 		<h4>Thông tin biểu đồ</h4>
 		<form class="form-inline" role="form">
+			<div class="form-group">
+				<div class="input-group">
+					<label for="chart_typye">Kiểu: </label>
+					<select id="chart_type" name="chart_type">
+						<option value="combo" selected="selected">Combo</option>
+						<option value="bar">Column</option>
+						<option value="pie">Pie</option>
+					</select>
+				</div>
+			</div>
 			<div class="form-group">
 				<div class="input-group">
 				  <label class="sr-only" for="chart_title">Tên</label>
@@ -103,9 +114,12 @@
 </div>
 <div class="row">
 	<div class="col-md-1"></div>
-	<div class="col-md-10">
+	<div id="chart_container" class="col-md-10">
 		<h4>Biểu đồ:</h4>
 		<div id="chart_div"></div>
+		<div id="chart_mask">
+			<img src="images/logo.gif"/>
+		</div>
 	</div>
 </div>
 </div>

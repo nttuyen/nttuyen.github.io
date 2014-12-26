@@ -1,6 +1,4 @@
 NUMBER_FORMAT = '0,0.00';
-google.load("visualization", "1", {packages:["corechart"], language: 'vi'});
-
 var Chart = function(googleChart) {
 	//Private method
 	function getNumberColumnType() {
@@ -233,6 +231,13 @@ var Chart = function(googleChart) {
 		}
 	}
 	
+	this.setGoogleChart = function(chart) {
+		this.googleChart = chart;
+		if(this.isDrawed) {
+			this.draw();
+		}
+	}
+	
 	this.draw = function() {
 		var $this = this;
 		if(!$this.googleChart) {
@@ -254,9 +259,14 @@ var Chart = function(googleChart) {
 				fontSize: 20,
 				fontName: 'Time news roman'
 			},
+			chart: {
+				title: $title,
+				subtitle: $title,
+			},
 			seriesType: "bars",
 			isStacked: $isStacked,
 			orientation: $orientation,
+			bars: $orientation == 'horizontal' ? 'vertical' : 'horizontal',
 			//series: {5: {type: "line"}}
 			width: $width,
 			height: $height,
@@ -307,6 +317,7 @@ var Chart = function(googleChart) {
 				}
 			}
 		}
+		console.log(h);
 		d.push(h);
 		for(var i = 0; i < $this.data.length; i++) {
 			var s = JSON.parse(JSON.stringify($this.data[i]));
@@ -319,15 +330,34 @@ var Chart = function(googleChart) {
 				index++;
 				if(col.isShowLabel) {
 					ns.push(s[index]);
+					index++;
 				}
-				index++;
 			}
 			d.push(ns);
 		}
 		
 		var gd = google.visualization.arrayToDataTable(d);
+		if($this.googleChart instanceof google.charts.Bar) {
+			options = google.charts.Bar.convertOptions(options);
+		} else if($this.googleChart instanceof google.visualization.PieChart) {
+			options.legend.position = 'right';
+		}
 		$this.googleChart.draw(gd, options);
 		this.isDrawed = true;
+		
+		//TODO: fix position
+		var $div = jQuery('#chart_div');
+		var $position = $div.position();
+		var width = $div.width();
+		var height = $div.height();
+		console.log($position, width, height);
+		
+		var $mask = jQuery('#chart_mask');
+		var top = $position.top + (height / 3 * 2);
+		var left = $position.left + (width / 3);
+		$mask.css('top', top);
+		$mask.css('left', left);
+		console.log(top, left);
 	}
 
 	this.reset = function() {
@@ -399,9 +429,10 @@ var Chart = function(googleChart) {
 
 //jQuery
 jQuery.noConflict();
+google.load("visualization", "1.1", {packages:["corechart", "bar"], language: 'vi'});
 google.setOnLoadCallback(function() {
-	var googleChart = new google.visualization.ComboChart(document.getElementById('chart_div'));
 	jQuery(document).ready(function($) {
+		var googleChart = new google.visualization.ComboChart(document.getElementById('chart_div'));
 		window.chart = new Chart(googleChart);
 		var index = 1;
 		$('#btn_add_column').on('click', function() {
@@ -420,6 +451,24 @@ google.setOnLoadCallback(function() {
 			var $this = $(this);
 			window.location.href += $this.attr('href');
 			window.location.reload();
+		});
+		$('#chart_type').on('change', function(){
+			var $this = $(this);
+			var chartType = $this.val();
+			console.log($this);
+			console.log(chartType);
+			
+			var googleChart = false;
+			var container = document.getElementById('chart_div');
+			if(chartType == 'combo') {
+				googleChart = new google.visualization.ComboChart(container);
+			} else if(chartType == 'bar') {
+				googleChart = new google.charts.Bar(container);
+				//googleChart = new google.visualization.BarChart(container);
+			} else if(chartType == 'pie') {
+				googleChart = new google.visualization.PieChart(container);
+			}
+			window.chart.setGoogleChart(googleChart);
 		});
 		
 		var listFile = [];
