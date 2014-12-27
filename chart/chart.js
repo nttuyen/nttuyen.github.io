@@ -176,24 +176,18 @@ var Chart = function(googleChart) {
 		
 		//. Update columnDef
 		$this.dataColmnDef.push(getNumberColumnType());
-		if(col.isShowLabel) {
-			this.dataColmnDef.push(getTextColumnType());
-		}
+		$this.dataColmnDef.push(getTextColumnType());
 		
 		//. Update data
 		var d = $this.data;
 		
 		//. Header
 		$this.dataHeaders.push(col.title);
-		if(col.isShowLabel) {
-			$this.dataHeaders.push('[LABEL]' + col.title);
-		}
+		$this.dataHeaders.push('[LABEL]' + col.title);
 		
 		for(var i = 0; i < d.length; i++) {
 			d[i].push(0);
-			if(col.isShowLabel) {
-				d[i].push('label');
-			}
+			d[i].push('');
 		}
 		$this.data = d;
 		$this.dataTable.updateSettings({columns: $this.dataColmnDef});
