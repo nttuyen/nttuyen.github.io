@@ -334,8 +334,8 @@ var Chart = function(googleChart) {
 				index++;
 				if(col.isShowLabel) {
 					ns.push(s[index]);
-					index++;
 				}
+				index++;
 			}
 			d.push(ns);
 		}
