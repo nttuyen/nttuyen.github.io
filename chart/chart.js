@@ -265,6 +265,8 @@ var Chart = function(googleChart) {
 			},
 			seriesType: "bars",
 			isStacked: $isStacked,
+			pointSize: 10,
+			pointShape: 'diamond',
 			orientation: $orientation,
 			bars: $orientation == 'horizontal' ? 'vertical' : 'horizontal',
 			//series: {5: {type: "line"}}
@@ -353,8 +355,8 @@ var Chart = function(googleChart) {
 		var $mask = jQuery('#chart_mask');
 		var mHeight = $mask.height();
 		var mWidth = $mask.width();
-		var top = $position.top + mHeight;
-		var left = $position.left + width - mWidth;
+		var top = $position.top + (height - mHeight)/2;
+		var left = $position.left + (width - mWidth)/2;
 		$mask.css('top', top);
 		$mask.css('left', left);
 	}
