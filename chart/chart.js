@@ -297,6 +297,9 @@ var Chart = function(googleChart) {
 				groupWidth: $groupWidth
 			}
 		}
+		if($this.columns.length == 1) {
+			options.legend.position = 'none';
+		}
 		
 		var d = [];
 		var h = [];
@@ -375,6 +378,10 @@ var Chart = function(googleChart) {
 			jQuery('#chart_group_width').val(data.config.groupWidth);
 			jQuery('#chart_is_stacked').attr('checked', data.config.isStacked);
 			jQuery('#chart_is_vertical').attr('checked', data.config.isVertical);
+			if(data.config.type) {
+				jQuery('#chart_type').val(data.config.type);
+				jQuery('#chart_type').change();
+			}
 		}
 		
 		//. Process column
