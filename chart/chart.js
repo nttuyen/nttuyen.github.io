@@ -313,6 +313,18 @@ var Chart = function(googleChart) {
 				if(col.axis == 1) {
 					options.vAxes[1].textStyle.color = col.color;
 				}
+				if($this.googleChart instanceof google.visualization.PieChart) {
+				  var colors = col.color.split(' ');
+				  var cs = [];
+				  for(var c = 0; c < colors.length; c++) {
+				    if(colors[c] && colors[c].trim() != '') {
+				      cs.push(colors[c]);
+				    }
+				  }
+				  if(cs.length > 0) {
+				    options.colors = cs;
+				  }
+				}
 			}
 		}
 		d.push(h);
