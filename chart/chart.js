@@ -113,9 +113,7 @@ var Chart = function(googleChart) {
 						var columnIndex = 1;
 						for(var j = 0; j < row; j++) {
 							columnIndex++;
-							if($this.columns[j].isShowLabel) {
-								columnIndex++;
-							}
+							columnIndex++;
 						}
 						
 						var isUpdated = false;
@@ -155,6 +153,7 @@ var Chart = function(googleChart) {
 				manualColumnResize: true,
 				manualRowResize: true,
 				columns: $this.dataColmnDef,
+				contextMenu: ['row_above', 'row_below', 'remove_row'],
 				afterChange: function(changes, source) {
 					if($this.isDrawed) {
 						$this.draw();

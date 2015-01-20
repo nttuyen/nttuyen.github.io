@@ -1,4 +1,4 @@
-{
+window.chart.loadData({
   config: {
     title: "Biểu đồ nhập khẩu ô tô từ 2009-2014",
     width: 900, // Độ rộng biểu đồ
@@ -16,4 +16,4 @@
   ],
   columnConfigs: {
   }
-}
+});
