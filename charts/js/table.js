@@ -2,7 +2,7 @@ var TableWrapper = function(dataTable, configTable) {
     this.dataTableID = dataTable;
     this.configTableID = configTable;
     this.onDataChange = false;
-    
+    this.dataTable = false;
     this.data = [
         ["Is Label column"],
         ["Show label"],
@@ -29,7 +29,7 @@ var TableWrapper = function(dataTable, configTable) {
     this.init = function() {
         var $this = this;
         var dataTabelContainer = document.getElementById($this.dataTableID);
-        new Handsontable(dataTabelContainer, {
+        this.dataTable = new Handsontable(dataTabelContainer, {
           data: $this.data,
           startRows: 5,
           startCols: 5,
@@ -51,6 +51,9 @@ var TableWrapper = function(dataTable, configTable) {
             return cellProperties;
           },
           afterChange: function(changes, source) {
+            if(source == 'loadData') {
+                return;
+            }
             if($this.onDataChange && jQuery.isFunction($this.onDataChange)) {
                 $this.onDataChange(changes, source);
             }
@@ -58,11 +61,10 @@ var TableWrapper = function(dataTable, configTable) {
         });
     }
     this.setData = function(d) {
-        while(this.data.length > 0) {
-            this.data.shift();
-        }
-        for(var i = 0; i < d.length; i++) {
-            this.data.push(d[i]);
+        this.data = d;
+        if(this.dataTable) {
+            this.dataTable.loadData(this.data);
+            //this.data = this.dataTable.getData();
         }
     }
     this.getData = function() {

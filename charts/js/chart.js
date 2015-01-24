@@ -122,14 +122,14 @@ var ChartWrapper = function() {
             if(color && color != '') {
                 options.series[i-1].color = color;
                 if(axis == 1) {
-                    options.vAxes[1].textStyle.color = col.color;
+                    options.vAxes[1].textStyle.color = color;
 		        }
 		        if(this.googleChart instanceof google.visualization.PieChart) {
-		            var cs = col.color.split(' ');
+		            var cls = color.split(/[\s,]+/);
 		            var cs = [];
-				    for(var c = 0; c < colors.length; c++) {
-				        if(colors[c] && colors[c].trim() != '') {
-				          cs.push(colors[c]);
+				    for(var c = 0; c < cls.length; c++) {
+				        if(cls[c] && cls[c].trim() != '') {
+				          cs.push(cls[c]);
 				        }
 				    }
 				    if(cs.length > 0) {
