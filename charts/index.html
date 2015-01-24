@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>nttuyen's chart tool</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link href="css/shop-item.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" media="screen" href="libs/handsontable.bootstrap.css">
+	<link rel="stylesheet" media="screen" href="libs/handsontable.full.css">
+	<script src="libs/handsontable.full.js"></script>
+	<script type="text/javascript" src="js/table.js"></script>
+	<script type="text/javascript" src="js/chart.js"></script>
+	<script type="text/javascript" src="js/mongodb.js"></script>
+	<script type="text/javascript" src="js/page.js"></script>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">Chart tools</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="#">About</a>
+                    </li>
+                    <!--<li>
+                        <a href="#">Services</a>
+                    </li>
+                    <li>
+                        <a href="#">Contact</a>
+                    </li>-->
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    Data configure
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne" aria-expanded="false">
+                            <div class="panel-body">
+                                <form>
+                                    <div class="form-group">
+                                        <input type="password" class="form-control" id="mongoLabApiKey" placeholder="Key">
+                                    </div>
+                                    <button type="button" class="btn btn-default" id="initMongoDB">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    Danh sach bieu do
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne" aria-expanded="false">
+                            <div class="panel-body">
+                                <ul class="list-group" id="chartListGroup">
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="chartItemTemplate" style="display: none;">
+                        <li class="list-group-item" chart-id="{chart_id}" class="chartItem">
+                            <a href="#" class="pull-right chartDelete"><i class="glyphicon glyphicon-remove"></i></a>
+                            <a href="#" class="chartLink">{chart_title}</a>
+                        </li>
+                    </div>
+                </div>
+                
+                <!--<p class="lead">Menu</p>
+                <div class="list-group">
+                    <a href="#" class="list-group-item active">Chart 1</a>
+                    <a href="#" class="list-group-item">Chart 2</a>
+                    <a href="#" class="list-group-item">Chart 3</a>
+                </div>-->
+            </div>
+
+            <div class="col-md-9">
+
+                <div class="thumbnail">
+                    <div class="caption-full">
+                        <h4><a href="#">Chart data</a></h4>
+                        <div id="data_table"></div>
+                    </div>
+                </div>
+                <a class="btn btn-warning" data-toggle="modal" data-target="#chartConfigModal">Configure</a>
+                <a id="draw_chart" class="btn btn-success">Draw</a>
+                <a id="save_chart" class="btn btn-default">Save</a>
+                <a id="save_as_new_chart" class="btn btn-link">Save as new</a>
+                <div>
+                    <div class="modal fade" id="chartConfigModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">Chart configure</h4>
+                          </div>
+                          <div class="modal-body">
+                            <div id="config_table"></div>
+                            <div>
+                                <form class="form-horizontal">
+                                    <div class="form-group">
+                                        <label for="chartType" class="col-sm-2 control-label">Title</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control" id="chartType">
+                                              <option value="pie">Pie chart</option>
+                                              <option value="column">Colmn chart</option>
+                                              <option value="combo" selected="selected">Combo chart</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="chartTitle" class="col-sm-2 control-label">Title</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" class="form-control" id="chartTitle" placeholder="Tên biểu đồ">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="chartWidth" class="col-sm-2 control-label">Width</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control" id="chartWidth" placeholder="Độ rộng biểu đồ">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="chartGroupWidth" class="col-sm-2 control-label">Group Width</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control" id="chartGroupWidth" placeholder="Độ rộng cột biểu đồ">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="chartHeight" class="col-sm-2 control-label">Height</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" class="form-control" id="chartHeight" placeholder="Chiều cao biểu đồ">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-2">&nbsp;</div>
+                                        <div class="col-sm-10">
+                                            <label class="checkbox-inline">
+                                              <input type="checkbox" id="chartIsStacked" value="option2"> Is stacked
+                                            </label>
+                                            <label class="checkbox-inline">
+                                              <input type="checkbox" id="chartIsVertical" value="option3"> Is vertical
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="chartOptions" class="col-sm-2 control-label">Other options</label>
+                                        <div class="col-sm-10">
+                                            <textarea id="chartOptions" class="form-control" rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button id="chartConfigSave" type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <div>
+                    &nbsp;
+                </div>
+                <div>
+                    <div id="google_chart"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    <!-- /.container -->
+
+    <div class="container">
+
+        <hr>
+
+        <!-- Footer -->
+        <footer>
+            <div class="row">
+                <div class="col-lg-12">
+                    <p>Copyright &copy; nttuyen 2015</p>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+    <!-- /.container -->
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
