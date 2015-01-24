@@ -121,10 +121,19 @@ jQuery(document).ready(function($) {
         $modal.find('#chartHeight').val(opts.height);
         $modal.find('#chartIsStacked').attr("checked", opts.isStacked);
         $modal.find('#chartIsVertical').attr("checked", opts.orientation == 'vertical');
+        $modal.find('#chartOptions').val(JSON.stringify(opts));
     });
     
     $('#chartConfigSave').on('click', function(e) {
         var $modal = $('#chartConfigModal');
+        
+        //Process option first
+        var opts = $modal.find('#chartOptions').val();
+        console.log(opts);
+        eval("opts = " + opts);
+        console.log(opts);
+        chart.extraOptions(opts);
+        
         var chartType = $modal.find('#chartType').val();
         var container = document.getElementById(GOOGLE_CHART_DOM_ID);
         if(chartType == 'combo') {
@@ -147,9 +156,6 @@ jQuery(document).ready(function($) {
         chart.setIsStacked($modal.find('#chartIsStacked').is(":checked"));
         chart.setOrientation($modal.find('#chartIsVertical').is(":checked") ? 'vertical' : 'horizontal');
         
-        //$modal.modal('toggle');
-        
-        //console.log(chart.getOptions());
         if(chart.isDrawed) {
             var data = table.getData();
             chart.draw(data);

@@ -5,8 +5,8 @@ var ChartWrapper = function() {
     this.options = {
 		title: "",
 		titleTextStyle: {
-			fontSize: 20,
-			fontName: 'times new roman'
+			fontSize: 20
+			//fontName: 'times new roman'
 		},
 		chart: {
 			title: "",
@@ -55,7 +55,7 @@ var ChartWrapper = function() {
     }
     
     this.extraOptions = function(extra) {
-        delete extra.titleTextStyle;
+        //delete extra.titleTextStyle;
         jQuery.extend(this.options, extra);
     }
     
