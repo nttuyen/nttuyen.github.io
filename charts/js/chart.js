@@ -113,7 +113,7 @@ var ChartWrapper = function() {
             }
             
             //. Axis
-            options.series[i] = {
+            options.series[i-1] = {
 				type: chartType,
 				targetAxisIndex: axis
 			}
