@@ -1,0 +1,406 @@
+<html>
+<head>
+	<title>My Calendar</title>
+
+	<script src="assets/jquery-1.12.0.js"></script>
+	<script type="text/javascript">
+		jQuery.noConflict();
+	</script>
+
+	<script type="text/javascript" src="assets/moment-with-locales.js"></script>
+
+	<!-- Bootstrap --> 
+	<link rel="stylesheet" href="assets/bootstrap/css/bootstrap.css">
+	<link rel="stylesheet" href="assets/bootstrap/css/bootstrap-theme.css">
+	<script src="assets/bootstrap/js/bootstrap.js"></script>
+
+
+	<!-- Bootstrap datepicker -->
+	<script type="text/javascript" src="assets/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>
+	<link rel="stylesheet" href="assets/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css" />
+
+
+	<!-- Full calendar library -->
+	<script type="text/javascript" src="assets/fullcalendar/fullcalendar.js"></script>
+	<link rel="stylesheet" type="text/css" href="assets/fullcalendar/fullcalendar.css">
+
+	<!-- Selectize -->
+	<script type="text/javascript" src="assets/selectize/js/standalone/selectize.js"></script>
+	<link rel="stylesheet" type="text/css" href="assets/selectize/css/selectize.bootstrap3.css">
+
+	<link rel="stylesheet" type="text/css" href="assets/base.css">
+</head>
+<body>
+	<!-- Modal -->
+	<div class="modal fade" id="eventDetailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">Event detail</h4>
+	      </div>
+	      <div class="modal-body">
+	        <form class="form-horizontal">
+	        	<div class="form-group">
+	        		<label for="eventTitle" class="col-sm-3 control-label">Title</label>
+	        		<div class="col-sm-9">
+				      <input type="text" class="form-control" id="eventTitle" placeholder="Event title">
+				    </div>
+	        	</div>
+	        	<div class="form-group">
+				    <div class="col-sm-offset-3 col-sm-9">
+				      <div class="checkbox">
+				        <label>
+				          <input type="checkbox" id="eventAllDay"> All day
+				        </label>
+				      </div>
+				    </div>
+				</div>
+	        	<div class="form-group">
+	        		<label for="eventStartTime" class="col-sm-3 control-label">Start time</label>
+	        		<div class="col-sm-9">
+				      <input type="text" class="form-control" id="eventStartTime" placeholder="Start time">
+				    </div>
+	        	</div>
+	        	<div class="form-group">
+	        		<label for="eventEndTime" class="col-sm-3 control-label">End time</label>
+	        		<div class="col-sm-9">
+				      <input type="text" class="form-control" id="eventEndTime" placeholder="End time">
+				    </div>
+	        	</div>
+	        	<div class="form-group">
+	        		<label for="eventAssignee" class="col-sm-3 control-label">Assigne to</label>
+	        		<div class="col-sm-9">
+				      <input type="text" class="form-control" id="eventAssignee" placeholder="Asignee">
+				    </div>
+	        	</div>
+	        </form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	        <button type="button" class="btn btn-primary" data-action="save">Save</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<div id="calendar"></div>
+			</div>
+		</div>
+	</div>
+	<div style="display: none" id="popover-event-action-template">
+		<div class="clearfix" data-eventid="{{eventid}}" style="width: 150px">
+			<div class="pull-left">
+				<a href="#" data-action="edit">Edit</a>
+			</div>
+			<div class="pull-right">
+				<a href="#" data-action="delete">Delete</a>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+
+	<!-- Add 'destroyed' event when dom element is removed -->
+	(function($){
+	  $.event.special.destroyed = {
+	    remove: function(o) {
+	      if (o.handler) {
+	        o.handler()
+	      }
+	    }
+	  }
+	})(jQuery);
+
+	function generateUUID() {
+	    var d = new Date().getTime();
+	    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+	        var r = (d + Math.random()*16)%16 | 0;
+	        d = Math.floor(d/16);
+	        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+	    });
+	    return uuid;
+	};
+
+	jQuery(document).ready(function($) {
+
+		// Init some modal
+		var $eventDetailModal = $('#eventDetailModal');
+		$eventDetailModal.find('#eventStartTime, #eventEndTime').datetimepicker({});
+		var $eventAssignee = $eventDetailModal.find('#eventAssignee').selectize({
+			create: false,
+			options: [
+				{id: 1, text: 'First user', value: 'user1'}
+			],
+			maxItems: 1,
+			searchField: ['text'],
+			labelField: 'text',
+			valueField: 'id',
+			load: function(query, callback) {
+				//TODO: need to load user info from server
+				var data = [
+					{id: 1, text: 'First user', value: 'user1'},
+					{id: 2, text: 'Second user', value: 'user2'},
+					{id: 3, text: 'Third user', value: 'user3'},
+				];
+				setTimeout(function(){
+					callback(data);
+				}, 1000);
+			}
+		});
+		var assigneeSelectize = $eventAssignee[0].selectize;
+
+		$eventDetailModal.find('#eventAllDay').change(function() {
+			var format = this.checked ? 'MM/DD/YYYY' : 'MM/DD/YYYY HH:mm'
+			$eventDetailModal.find('#eventStartTime').data("DateTimePicker").format(format);
+			$eventDetailModal.find('#eventEndTime').data("DateTimePicker").format(format);
+		});
+
+		var saveEvent = function(event) {
+			//TODO: call ajax to update event
+		}
+
+		var editingEvent = false;
+		var showEditEventDetail = function(event) {
+			//. Update modal
+
+			editingEvent = event;
+
+			$eventDetailModal.find('#eventTitle').val(editingEvent.title);
+			$eventDetailModal.find('#eventAllDay').prop('checked', editingEvent.allDay);
+
+			var format = editingEvent.allDay ? 'MM/DD/YYYY' : 'MM/DD/YYYY HH:mm'
+			$eventDetailModal.find('#eventStartTime').data("DateTimePicker").format(format);
+			$eventDetailModal.find('#eventEndTime').data("DateTimePicker").format(format);
+
+			var end = editingEvent.end;
+			if (editingEvent.allDay) {
+            	end.subtract(1, 'seconds');
+            }
+			$eventDetailModal.find('#eventStartTime').data("DateTimePicker").date(editingEvent.start);
+			$eventDetailModal.find('#eventEndTime').data("DateTimePicker").date(end);
+
+			if (editingEvent.assignee != undefined) {
+				assigneeSelectize.setValue(editingEvent.assignee);
+				//TODO: may need to load option from server
+				setTimeout(function() {
+					assigneeSelectize.addOption([
+						{id: 1, text: 'First user', value: 'user1'},
+						{id: 2, text: 'Second user', value: 'user2'},
+						{id: 3, text: 'Third user', value: 'user3'},
+					]);
+					assigneeSelectize.setValue(editingEvent.assignee);
+					assigneeSelectize.disable();
+				}, 2000);
+			} else {
+				assigneeSelectize.clear();
+			}
+
+			$eventDetailModal.modal();
+		}
+
+		$eventDetailModal.on('click', '[data-action="save"]', function(e) {
+			//Bind to event
+			editingEvent.title = $eventDetailModal.find('#eventTitle').val();
+			editingEvent.allDay = $eventDetailModal.find('#eventAllDay').is(':checked');
+
+			editingEvent.start = $eventDetailModal.find('#eventStartTime').data("DateTimePicker").date();
+			editingEvent.end = $eventDetailModal.find('#eventEndTime').data("DateTimePicker").date();
+			if (editingEvent.allDay) {
+				editingEvent.end.add(1, 'seconds');
+			}
+
+			editingEvent.assignee = assigneeSelectize.getValue();
+
+			//TODO: call api to save event
+			if (!editingEvent.id) {
+				editingEvent.id = generateUUID();
+				$('#calendar').fullCalendar('addEventSource', {events: [editingEvent]});
+			} else {
+				$('#calendar').fullCalendar('updateEvent', editingEvent);
+			}
+			
+
+			$eventDetailModal.modal('hide');
+		});
+
+		$('#calendar').fullCalendar({
+			height: 650,
+			header: {
+				left: 'prev,next today',
+				center: 'title',
+				right: 'month,agendaWeek,agendaDay'
+			},
+			firstDay: 1,
+			weekends: true,
+			defaultView: 'agendaWeek',
+			nowIndicator: true,
+			editable: true,
+			eventLimit: true,
+			timezone: 'local',
+			selectable: true,
+			forceEventDuration: true,
+			select: function( start, end, jsEvent, view) {
+				var _this = this;
+
+                var allDay = !start.hasTime() && !end.hasTime();
+				var event = {
+					id: 0,
+					title: '',
+					allDay: allDay,
+					start: start,
+					end: end
+				};
+				showEditEventDetail(event);
+			},
+			eventClick: function(event, jsEvent, view) {
+				var $event = $(jsEvent.target).closest('.fc-event');
+				$event.popover({
+					container: 'body',
+					content: function() {
+						var content = $('#popover-event-action-template').html();
+						content = content.replace('{{eventid}}', event.id);
+						return content;
+					},
+					html: true,
+					placement: 'top',
+					title: event.title,
+				}).on('inserted.bs.popover', function(e){
+					var popoverId = '#' + $(this).attr('aria-describedby');
+
+					var left = jsEvent.pageX;
+				    var top = jsEvent.pageY;
+
+				    var $popover = $(popoverId);
+				    var theHeight = $popover.height();
+				    var theWidth = $popover.width();
+
+				    var cssLeft = (left - (theWidth / 2));
+				    var cssTop = (top - theHeight - 10);
+
+				    setTimeout(function() {
+				    	$popover.css('left', cssLeft + 'px');
+				    	$popover.css('top', cssTop + 'px');
+				    }, 100);
+
+				}).on('shown.bs.popover', function(e) {
+					var popoverId = '#' + $(this).attr('aria-describedby');
+					
+					$('body').one('click', popoverId + ' [data-action="edit"]', function(e) {
+						showEditEventDetail(event);
+					});
+					$('body').one('click', popoverId + ' [data-action="delete"]', function(e) {
+						if (confirm('Are you sure want to remove event: ' + event.title)) {
+							//TODO: call server api to remove event here
+							$('#calendar').fullCalendar('removeEvents', event.id);
+						}
+					});
+
+					closePopover = function() {
+						$event.popover('destroy');
+						$(document).off('keyup', escPressHandler);
+						$(document).off('click', documentClickHandler);
+					}
+
+					// Esc press
+					var escPressHandler = function(e) {
+						if (e.which === 27 || e.keyCode === 27) {
+				            closePopover();
+				        }
+					}
+					$(document).on('keyup', escPressHandler);
+
+					// Document click
+					var documentClickHandler = function(e) {
+						closePopover();
+					}
+					$(document).one('click', documentClickHandler);
+
+					//. On Dom removed
+					$event.on('destroyed', function() {
+						closePopover();
+					});
+
+				}).popover('toggle');
+			},
+			eventDrop: function( event, delta, revertFunc, jsEvent, ui, view ) { 
+				//TODO: call save event here
+				console.log('event dropped');
+			},
+			eventResize: function( event, delta, revertFunc, jsEvent, ui, view ) {
+				//TODO: call save event here
+				console.log('event resized');
+			},
+			events: [
+				{
+					id: 1,
+					title: 'All Day Event',
+					start: '2016-01-01',
+					assignee: '3'
+				},
+				{
+					id: 2,
+					title: 'Long Event',
+					start: '2016-01-07',
+					end: '2016-01-10'
+				},
+				{
+					id: 999,
+					title: 'Repeating Event',
+					start: '2016-01-09T16:00:00'
+				},
+				{
+					id: 999,
+					title: 'Repeating Event',
+					start: '2016-01-16T16:00:00'
+				},
+				{
+					id: 3,
+					title: 'Conference',
+					start: '2016-01-11',
+					end: '2016-01-13'
+				},
+				{
+					id: 4,
+					title: 'Meeting',
+					start: '2016-01-12T10:30:00',
+					end: '2016-01-12T12:30:00'
+				},
+				{
+					id: 5,
+					title: 'Lunch',
+					start: '2016-01-12T12:00:00'
+				},
+				{
+					id: 6,
+					title: 'Meeting',
+					start: '2016-01-12T14:30:00'
+				},
+				{
+					id: 7,
+					title: 'Happy Hour',
+					start: '2016-01-12T17:30:00'
+				},
+				{
+					id: 8,
+					title: 'Dinner',
+					start: '2016-01-12T20:00:00'
+				},
+				{
+					id: 9,
+					title: 'Birthday Party',
+					start: '2016-01-13T07:00:00'
+				},
+				{
+					id: 10,
+					title: 'Click for Google',
+					//url: 'http://google.com/',
+					start: '2016-01-28'
+				}
+			]
+		});
+	});
+	</script>
+</body>
+</html>
